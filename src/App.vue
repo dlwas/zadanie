@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="container">
     <div>
-      <h1>Zadnie rekrutacyjne dla x</h1>
+      <h1>Zadnie rekrutacyjne dla Olicom</h1>
     </div>
     <div>
       <Table
