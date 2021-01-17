@@ -1,0 +1,89 @@
+<div class="row my-4">
+  <div class="col">
+    <label class="form-label"> Data to display </label>
+    <input type="text" class="form-control" :value="getAvailableColumnList" />
+    <div class="form-text fw-light fs-6">
+      Available: {{ getAvailableColumnList }}
+    </div>
+  </div>
+  <div class="col">
+    <label class="form-label"> Endpoint </label>
+    <input type="text" class="form-control" :value="endpoint" />
+  </div>
+  <div class="col-auto">
+    <label class="form-label invisible"> Update </label>
+    <button class="form-control btn btn-primary">
+      Update
+    </button>
+  </div>
+</div>
+
+<div class="row align-items-center my-4">
+  <div class="col">
+    <!-- start - pagination -->
+    <div class="form-check">
+      <input
+        id="elmPagination"
+        class="form-check-input"
+        type="checkbox"
+        :checked="getOptions.pagination"
+        @click="toggleOptions('pagination')"
+      />
+      <label class="form-check-label" for="elmPagination">
+        Pagination
+      </label>
+    </div>
+    <!-- end - pagination -->
+    <!-- start - sorting -->
+    <div class="col">
+      <div class="col form-check">
+        <input
+          id="elmSorting"
+          class="form-check-input"
+          type="checkbox"
+          :checked="getOptions.sorting"
+          @click="toggleOptions('sorting')"
+        />
+        <label class="form-check-label" for="elmSorting">
+          Sorting
+        </label>
+      </div>
+    </div>
+    <!-- end - sorting -->
+  </div>
+  <div class="col">
+    <!-- start - search -->
+    <div class="row align-items-center">
+      <div class="col-auto form-check">
+        <input
+          id="elmSearch"
+          class="form-check-input align-middle"
+          type="checkbox"
+          :checked="getOptions.search"
+          @click="toggleOptions('search')"
+        />
+        <label class="form-check-label" for="elmSearch">
+          Search
+        </label>
+      </div>
+      <div class="col-auto form-check">
+        <input
+          id="elmSearchText"
+          class="form-control align-middle btn-sm"
+          type="text"
+          :disabled="!getOptions.search"
+        />
+      </div>
+      <div class="col-auto form-check">
+        <button
+          class="btn btn-primary align-middle"
+          :disabled="!getOptions.search"
+          @click="search(this)"
+        >
+          Search
+        </button>
+      </div>
+    </div>
+    <!-- end - search -->
+  </div>
+</div>
