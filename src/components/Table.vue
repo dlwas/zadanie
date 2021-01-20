@@ -2,25 +2,17 @@
   <div>
     <div class="options mt-5">
       <h3>Options</h3>
-      <form>
+      <form @change="changeForm()">
         <div class="row my-4">
-          <div class="col-5">
+          <div class="col">
             <label class="form-label"> Data to display </label>
-            <input type="text" class="form-control" :value="getAvailableColumnList" />
-            <div class="form-text fs-5 fw-light">Available: {{ getAvailableColumnList }}</div>
+            <input id="elmTableCol" type="text" class="form-control" :value="$TableListAvailable" />
+            <div class="form-text fs-5 fw-light">Available: {{ $TableListAvailable }}</div>
           </div>
-          <div class="col-5">
-            <label class="form-label"> Endpoint </label>
-            <input type="text" class="form-control" :value="endpoint" />
-          </div>
-          <div class="col-2">
-            <label class="form-label invisible"> Update </label>
-            <button
-              type="button"
-              class="form-control btn btn-primary"
-              v-on:change="$emit('change', $event.target.checked)"
-            >
-              Update
+          <div class="col-auto">
+            <label class="form-label invisible"> Reset form </label>
+            <button type="button" class="form-control btn btn-danger" @click="resetForm()">
+              Reset
             </button>
           </div>
         </div>
@@ -31,8 +23,8 @@
               id="elmSearch"
               class="form-check-input"
               type="checkbox"
-              :checked="getOptions.search"
-              @click="toggleOptions('search')"
+              :checked="$Options.search"
+              @click="toggleOption('search')"
             />
             <label class="form-check-label" for="elmSearch">
               Search
@@ -43,18 +35,9 @@
               id="elmSearchText"
               class="form-control btn-sm"
               type="text"
-              :disabled="!getOptions.search"
+              :disabled="!$Options.search"
               placeholder="some name, email, company..."
-              value="Sincere@april.biz"
             />
-          </div>
-          <div class="col-auto">
-            <button type="button" class="btn btn-primary" :disabled="!getOptions.search" @click="doSearch()">
-              Search
-            </button>
-            <button type="button" class="btn btn-warning ml-3" :disabled="!getOptions.search" @click="clearSearch()">
-              Clear
-            </button>
           </div>
         </div>
         <!-- end - search -->
@@ -64,8 +47,8 @@
               id="elmSorting"
               class="form-check-input"
               type="checkbox"
-              :checked="getOptions.sorting"
-              @click="toggleOptions('sorting')"
+              :checked="$Options.sorting"
+              @click="toggleOption('sorting')"
             />
             <label class="form-check-label" for="elmSorting">
               Sorting
@@ -76,8 +59,8 @@
               id="elmPagination"
               class="form-check-input"
               type="checkbox"
-              :checked="getOptions.pagination"
-              @click="toggleOptions('pagination')"
+              :checked="$Options.pagination"
+              @click="toggleOption('pagination')"
             />
             <label class="form-check-label" for="elmPagination">
               Pagination
@@ -86,12 +69,12 @@
           <div class="col">
             Page:
             <a
-              class="btn"
-              :class="[getCurrentPage == index ? 'btn-secondary' : 'btn-outline-secondary']"
-              v-for="(item, index) in getPageMaxNumber"
+              class="btn mx-1"
+              :class="[$PaginationPageCurrent == index ? 'btn-secondary' : 'btn-outline-secondary']"
+              v-for="(item, index) in $PaginationPageMax"
               :key="index"
-              @click="setPage(index)"
-              :disabled="!getOptions.pagination"
+              @click="setPaginationPage(index)"
+              :disabled="!$Options.pagination"
             >
               {{ index }}
             </a>
@@ -102,28 +85,27 @@
 
     <div class="mt-5">
       <h3>Table</h3>
-
       <table class="table table-hover">
         <thead>
           <tr>
             <th
               class="table-head"
-              :class="{ 'table-head-active': getOptions.sorting }"
+              :class="{ 'table-head-active': $Options.sorting }"
               scope="col"
-              v-for="(item, index) in getColumnList"
+              v-for="(item, index) in $TableList"
               :key="index"
-              @click="sortData(item)"
+              @click="doSort(item)"
             >
               <span>{{ item }}</span>
-              <span v-if="canSort && sort.lastChoice === item">
-                {{ sort.lastChoice === item && sort.asc ? '↑' : '↓' }}
+              <span v-if="$CanSort && dynamic.sort.lastChoice === item">
+                {{ dynamic.sort.lastChoice === item && dynamic.sort.asc ? '↑' : '↓' }}
               </span>
             </th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(data, index) in newTableData" :key="index">
-            <td v-for="(type, index) in getColumnList" :key="index">
+          <tr v-for="(data, index) in $DataLocal" :key="index">
+            <td v-for="(type, index) in $TableList" :key="index">
               <a v-if="type == 'email'" :href="`mailto:${data[type]}`">
                 {{ data[type] }}
               </a>
@@ -137,6 +119,20 @@
 </template>
 
 <script>
+//
+function assign(obj, keyPath, value) {
+  let lastKeyIndex = keyPath.length - 1
+  for (var i = 0; i < lastKeyIndex; ++i) {
+    let key = keyPath[i]
+    if (!(key in obj)) {
+      obj[key] = {}
+    }
+    obj = obj[key]
+  }
+  obj[keyPath[lastKeyIndex]] = value
+}
+//
+
 export default {
   name: 'Table',
   props: {
@@ -164,22 +160,24 @@ export default {
   data() {
     return {
       options: {},
-      tableData: [],
-      newTableData: [],
-      sort: {
-        asc: true,
-        lastChoice: 'name'
+      dynamic: {
+        sort: {
+          asc: true,
+          lastChoice: 'name'
+        },
+        pagination: {
+          itemsByPage: 3,
+          pageCurrent: 0,
+          pageMax: null
+        }
       },
-      pagin: {
-        sizeByPage: 3,
-        leftItems: null,
-        currentPage: 0,
-        maxPages: null
+      data: {
+        external: [],
+        local: []
       }
     }
   },
   mounted() {
-    // set options from props to local storage
     this.options = {
       endpoint: this.endpoint,
       search: this.search,
@@ -188,43 +186,63 @@ export default {
       dataTypes: this.dataTypes
     }
 
-    // get and save external data
-    this.getExternalData(this.options.endpoint).then(data => {
-      this.pagin.maxPages = Math.floor(data.length / 3) + 1
-      this.updateExternalData(data)
+    this.getExternalData(this.$Options.endpoint).then(data => {
+      this.dynamic.pagination.pageMax = Math.floor(data.length / 3) + 1
+      this.setAllData(data)
     })
   },
   computed: {
-    getOptions() {
+    $Options() {
       return this.options
     },
-    getAvailableColumnList() {
-      return this.options.dataTypes
+    $DataExternal() {
+      return this.data.external
     },
-    getColumnList() {
-      return this.options.dataTypes ? this.options.dataTypes.split(',') : this.options.dataTypes
+    $DataLocal() {
+      return this.data.local
     },
-    getPageMaxNumber() {
-      return Math.floor(this.tableData.length / 3) + 1
+    $TableList() {
+      const dataTypes = this.$Options.dataTypes
+      return dataTypes ? dataTypes.split(',') : dataTypes
     },
-    getCurrentPage() {
-      return this.pagin.currentPage
+    $TableListAvailable() {
+      return this.$Options.dataTypes
     },
-    canSort() {
-      return this.options.sorting || !this.options.pagination
+    $PaginationPageMax() {
+      return this.dynamic.pagination.pageMax
     },
-    getPagination() {
-      return this.options.pagination
+    $PaginationPageCurrent() {
+      return this.dynamic.pagination.pageCurrent
+    },
+    $CanSort() {
+      return this.$Options.sorting && !this.$Options.pagination
     }
   },
   methods: {
+    changeForm() {
+      this.$Options.dataTypes = document.getElementById('elmTableCol').value
+      this.doSearch()
+    },
+    resetForm() {
+      this.resetTableColumns()
+      this.clearSearch()
+    },
+    resetTableColumns() {
+      this.$Options.dataTypes = this.dataTypes
+    },
+    // $data
+    setAllData(data) {
+      this.data.external = data
+      this.data.local = data
+    },
+    setLocalData(data) {
+      this.data.local = data
+    },
     async getExternalData(endpoint) {
-      // get and format data from endpoint
       try {
         const { data } = await this.axios.get(endpoint)
-        let oldData = data
         let newData = []
-        oldData.forEach(item => {
+        data.forEach(item => {
           newData.push({
             id: item.id,
             name: item.name,
@@ -234,66 +252,60 @@ export default {
             website: item.website
           })
         })
+
         return newData
       } catch (error) {
         console.log(error)
       }
     },
-    updateExternalData(data) {
-      // save data to local storage
-      this.tableData = data
-      this.newTableData = data
+    updateTableData(indexes) {
+      let searchedData = []
+      this.$DataExternal.forEach((item, index) => {
+        if (indexes.includes(index)) searchedData.push(item)
+      })
+      this.setLocalData(searchedData)
     },
+    // $pagination
     updatePagination() {
-      if (!this.getOptions.pagination) return
-      const pagin = this.pagin
-      let currentValue = pagin.currentPage * 3
-      this.newTableData = this.tableData.slice(currentValue, currentValue + 3).map(i => {
+      if (!this.$Options.pagination) return
+      let currentValue = this.dynamic.pagination.pageCurrent * 3
+      let oldData = this.$DataExternal
+      let newData = []
+      newData = oldData.slice(currentValue, currentValue + 3).map(i => {
         return i
       })
+      this.setLocalData(newData)
     },
-    togglePagination() {
-      if (!this.getOptions.pagination || !this.getOptions.sorting) this.newTableData = this.tableData
-      this.setPage(0)
+    setPaginationPage(index) {
+      if (!this.$Options.pagination) return
+      this.dynamic.pagination.pageCurrent = index
+      this.updatePagination()
     },
-    setPage(index) {
-      if (!this.getOptions.pagination) return
-      this.pagin.currentPage = index
-      this.updatePagination(index)
-    },
-    sortData(columName) {
-      if (!this.canSort) return
-
-      const newData = this.newTableData.sort((a, b) => {
-        a = a[columName]
-        b = b[columName]
-
-        if (typeof a == 'number') return this.sort.asc ? a - b : b - a
-        if (typeof a == 'string') return this.sort.asc ? a.localeCompare(b) : b.localeCompare(a)
+    // $sort
+    doSort(columnName) {
+      if (!this.$CanSort) return
+      const asc = this.dynamic.sort.asc
+      const newData = this.$DataLocal.sort((a, b) => {
+        a = a[columnName]
+        b = b[columnName]
+        if (typeof a == 'number') return asc ? a - b : b - a
+        if (typeof a == 'string') return asc ? a.localeCompare(b) : b.localeCompare(a)
       })
       // toggle asc / desc
-      this.sort.asc = !this.sort.asc
-      this.sort.lastChoice = columName
+      this.dynamic.sort.asc = !this.dynamic.sort.asc
+      this.dynamic.sort.lastChoice = columnName
       // update data
-      this.newTableData = newData
+      this.setLocalData(newData)
     },
-    toggleOptions(optionName) {
-      // update option
-      this.options[optionName] = !this.options[optionName]
-      // do other stuff after changes
-      this.togglePagination()
-    },
-    beEmail(trItem, tdItem) {
-      return tdItem == 'email' ? `<a>${trItem[tdItem]}</a>` : trItem[tdItem]
-    },
+    // $search
     doSearch() {
-      if (!this.getOptions.search) return
+      if (!this.$Options.search) return
       this.clearSearch()
       let phrase = document.getElementById('elmSearchText')
       let indexes = []
-      this.newTableData.find((item, index) => {
+      this.$DataExternal.find((item, index) => {
         Object.keys(item).forEach(prop => {
-          if (this.normString(item[prop]).search(this.normString(phrase.value)) != -1) {
+          if (this.helpersNormString(item[prop]).search(this.helpersNormString(phrase.value)) != -1) {
             if (!indexes.includes(index)) indexes.push(index)
           }
         })
@@ -301,18 +313,26 @@ export default {
       this.updateTableData(indexes)
     },
     clearSearch() {
-      this.newTableData = this.tableData
+      this.setLocalData(this.$DataExternal)
     },
-    normString(string) {
+    // $option
+    toggleOption(name) {
+      if (name == 'sorting') {
+        this.options.pagination = false
+        this.options.sorting = true
+      } else if (name == 'pagination') {
+        this.options.pagination = true
+        this.options.sorting = false
+      } else {
+        this.options[name] = !this.options[name]
+      }
+    },
+    // $helpers
+    helpersNormString(string) {
       return string.toString().toLowerCase()
     },
-    updateTableData(indexes) {
-      let searchedData = []
-      console.log(indexes)
-      this.tableData.forEach((item, index) => {
-        if (indexes.includes(index)) searchedData.push(item)
-      })
-      this.newTableData = searchedData
+    helpersDoEmail(trItem, tdItem) {
+      return tdItem == 'email' ? `<a>${trItem[tdItem]}</a>` : trItem[tdItem]
     }
   }
 }
@@ -322,6 +342,7 @@ export default {
 .table {
   &-head {
     text-transform: capitalize;
+
     &-active {
       & span {
         cursor: pointer;

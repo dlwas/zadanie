@@ -2,8 +2,9 @@
 
   ## TO DO
 - [x] add functionality
-- [ ] code refactor
-- [ ] fix functionality (adding relations between modes)
+- [x] code refactor
+- [x] fix functionality (adding relations between modes)
+- [ ] add 320w RWD
 
 ## Project setup
 
