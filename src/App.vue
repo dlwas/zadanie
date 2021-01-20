@@ -9,30 +9,30 @@
         :search="this.search"
         :sorting="this.sorting"
         :pagination="this.pagination"
-        dataTypes="name,email,company,website"
+        dataTypes="id,name,email,company,website"
       />
     </div>
   </div>
 </template>
 
 <script>
-import Table from "./components/Table.vue";
+import Table from './components/Table.vue'
 
 export default {
-  name: "App",
+  name: 'App',
   components: {
     Table
   },
   data() {
     return {
-      endpoint: "https://jsonplaceholder.typicode.com/users",
+      endpoint: 'https://jsonplaceholder.typicode.com/users',
       search: true,
       sorting: true,
       pagination: false,
-      dataTypes: ""
-    };
+      dataTypes: ''
+    }
   }
-};
+}
 </script>
 
 <style>
