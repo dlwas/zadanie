@@ -4,12 +4,12 @@
       <h3>Options</h3>
       <form @change="changeForm()">
         <div class="row my-4">
-          <div class="col">
+          <div class="col-md col-sm-12">
             <label class="form-label"> Data to display </label>
             <input id="elmTableCol" type="text" class="form-control" :value="$TableListAvailable" />
             <div class="form-text fs-5 fw-light">Available: {{ $TableListAvailable }}</div>
           </div>
-          <div class="col-auto">
+          <div class="col-md-auto col-sm-12">
             <label class="form-label invisible"> Reset form </label>
             <button type="button" class="form-control btn btn-danger" @click="resetForm()">
               Reset
@@ -18,7 +18,7 @@
         </div>
         <!-- start - search -->
         <div class="row my-4 d-flex align-items-center">
-          <div class="col-auto ml-4">
+          <div class="col-sm-12 ml-4 my-2">
             <input
               id="elmSearch"
               class="form-check-input"
@@ -30,7 +30,7 @@
               Search
             </label>
           </div>
-          <div class="col">
+          <div class="col-sm-12">
             <input
               id="elmSearchText"
               class="form-control btn-sm"
@@ -41,8 +41,8 @@
           </div>
         </div>
         <!-- end - search -->
-        <div class="row my-4 d-flex align-items-center">
-          <div class="col-auto mx-4">
+        <div class="row d-flex align-items-center">
+          <div class="col-sm-auto ml-4">
             <input
               id="elmSorting"
               class="form-check-input"
@@ -54,7 +54,7 @@
               Sorting
             </label>
           </div>
-          <div class="col-auto">
+          <div class="col-sm-auto ml-4 mt-3 mt-sm-0">
             <input
               id="elmPagination"
               class="form-check-input"
@@ -66,7 +66,7 @@
               Pagination
             </label>
           </div>
-          <div class="col">
+          <div class="col-sm-auto mt-2 mt-sm-0">
             Page:
             <a
               class="btn mx-1"
