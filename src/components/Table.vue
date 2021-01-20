@@ -85,35 +85,37 @@
 
     <div class="mt-5">
       <h3>Table</h3>
-      <table class="table table-hover">
-        <thead>
-          <tr>
-            <th
-              class="table-head"
-              :class="{ 'table-head-active': $Options.sorting }"
-              scope="col"
-              v-for="(item, index) in $TableList"
-              :key="index"
-              @click="doSort(item)"
-            >
-              <span>{{ item }}</span>
-              <span v-if="$CanSort && dynamic.sort.lastChoice === item">
-                {{ dynamic.sort.lastChoice === item && dynamic.sort.asc ? '↑' : '↓' }}
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(data, index) in $DataLocal" :key="index">
-            <td v-for="(type, index) in $TableList" :key="index">
-              <a v-if="type == 'email'" :href="`mailto:${data[type]}`">
-                {{ data[type] }}
-              </a>
-              <span v-if="type != 'email'"> {{ data[type] }} </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th
+                class="table-head"
+                :class="{ 'table-head-active': $Options.sorting }"
+                scope="col"
+                v-for="(item, index) in $TableList"
+                :key="index"
+                @click="doSort(item)"
+              >
+                <span>{{ item }}</span>
+                <span v-if="$CanSort && dynamic.sort.lastChoice === item">
+                  {{ dynamic.sort.lastChoice === item && dynamic.sort.asc ? '↑' : '↓' }}
+                </span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="(data, index) in $DataLocal" :key="index">
+              <td v-for="(type, index) in $TableList" :key="index">
+                <a v-if="type == 'email'" :href="`mailto:${data[type]}`">
+                  {{ data[type] }}
+                </a>
+                <span v-if="type != 'email'"> {{ data[type] }} </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>

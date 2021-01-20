@@ -1,5 +1,5 @@
 <template>
-  <div id="app" class="container">
+  <div id="app" class="container-fluid container-sm">
     <div>
       <h1>Zadnie rekrutacyjne dla Olicom</h1>
     </div>
