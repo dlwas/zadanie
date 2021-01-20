@@ -4,6 +4,7 @@
 - [x] add functionality
 - [x] code refactor
 - [x] fix functionality (adding relations between modes)
+- [x] add mobile view
 - [ ] add 320w RWD
 
 ## Project setup
